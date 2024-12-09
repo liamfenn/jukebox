@@ -370,11 +370,18 @@ function App() {
         camera={{ 
           position: [0, 0, 120],
           fov: 45,
-          near: 0.1,
-          far: 1000
+          near: 1,
+          far: 500
         }}
         style={{ width: '100%', height: '100vh' }}
+        gl={{ 
+          antialias: true,
+          alpha: false,
+          powerPreference: "high-performance"
+        }}
+        dpr={[1, 2]} // Limit pixel ratio for better performance
       >
+        <color attach="background" args={['#000000']} />
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <OrbitControls 
@@ -383,6 +390,7 @@ function App() {
           rotateSpeed={0.5}
           minDistance={50}
           maxDistance={200}
+          enablePan={false}
         />
         <Visualization data={visualData} />
       </Canvas>

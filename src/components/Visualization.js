@@ -1,11 +1,23 @@
 import React, { useMemo, useRef } from 'react';
-import { useLoader, useFrame } from '@react-three/fiber';
+import { useLoader } from '@react-three/fiber';
 import { Text, Line, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 
-const GenreNode = ({ position, name, isMainGenre }) => {
+// Pre-create geometries to be reused
+const genreGeometry = new THREE.PlaneGeometry(1, 1);
+const artistGeometry = new THREE.PlaneGeometry(1, 1);
+
+// Create materials once
+const borderMaterial = new THREE.MeshBasicMaterial({ color: '#f0f0f0' });
+const whiteMaterial = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+const fallbackMaterial = new THREE.MeshBasicMaterial({ color: '#ffd93d' });
+
+const GenreNode = React.memo(({ position, name, isMainGenre }) => {
   const width = isMainGenre ? 3 : 2.5;
   const height = isMainGenre ? 1 : 0.8;
+
+  const scale = useMemo(() => [width + 0.1, height + 0.1, 1], [width, height]);
+  const innerScale = useMemo(() => [width, height, 1], [width, height]);
 
   return (
     <Billboard
@@ -15,16 +27,8 @@ const GenreNode = ({ position, name, isMainGenre }) => {
       lockZ={false}
       position={position}
     >
-      {/* Background with border */}
-      <mesh>
-        <planeGeometry args={[width + 0.1, height + 0.1]} />
-        <meshBasicMaterial color="#f0f0f0" />
-      </mesh>
-      {/* White background */}
-      <mesh position={[0, 0, 0.01]}>
-        <planeGeometry args={[width, height]} />
-        <meshBasicMaterial color="#ffffff" />
-      </mesh>
+      <mesh geometry={genreGeometry} material={borderMaterial} scale={scale} />
+      <mesh geometry={genreGeometry} material={whiteMaterial} scale={innerScale} position={[0, 0, 0.01]} />
       <Text
         position={[0, 0, 0.02]}
         fontSize={isMainGenre ? 0.4 : 0.35}
@@ -37,15 +41,20 @@ const GenreNode = ({ position, name, isMainGenre }) => {
       </Text>
     </Billboard>
   );
-};
+});
 
-const ArtistNode = ({ position, imageUrl }) => {
-  const texture = useMemo(() => {
-    const loader = new THREE.TextureLoader();
-    return imageUrl ? loader.load(imageUrl) : null;
+const ArtistNode = React.memo(({ position, imageUrl }) => {
+  const material = useMemo(() => {
+    if (!imageUrl) return fallbackMaterial;
+    
+    const texture = new THREE.TextureLoader().load(imageUrl);
+    return new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true
+    });
   }, [imageUrl]);
 
-  const size = 1.5;
+  const scale = useMemo(() => [1.5, 1.5, 1], []);
 
   return (
     <Billboard
@@ -55,19 +64,12 @@ const ArtistNode = ({ position, imageUrl }) => {
       lockZ={false}
       position={position}
     >
-      <mesh>
-        <planeGeometry args={[size, size]} />
-        <meshBasicMaterial 
-          color={imageUrl ? 'white' : '#ffd93d'}
-          map={texture}
-          transparent={true}
-        />
-      </mesh>
+      <mesh geometry={artistGeometry} material={material} scale={scale} />
     </Billboard>
   );
-};
+});
 
-const Connection = ({ start, end, type }) => {
+const Connection = React.memo(({ start, end, type }) => {
   const points = useMemo(() => [start, end], [start, end]);
   const color = type === 'artist-genre' ? '#ffffff33' : '#ffffff66';
 
@@ -79,9 +81,9 @@ const Connection = ({ start, end, type }) => {
       dashed={type !== 'artist-genre'}
     />
   );
-};
+});
 
-const Visualization = ({ data }) => {
+const Visualization = React.memo(({ data }) => {
   const { nodes, connections } = data;
 
   return (
@@ -111,6 +113,6 @@ const Visualization = ({ data }) => {
       })}
     </group>
   );
-};
+});
 
 export default Visualization; 
