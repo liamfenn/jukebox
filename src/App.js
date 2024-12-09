@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import Visualization from './components/Visualization';
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const REDIRECT_URI = 'http://localhost:3000';
+const REDIRECT_URI = 'https://jukebox-phi-jade.vercel.app/';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const spotifyApi = new SpotifyWebApi();
 
@@ -51,7 +51,7 @@ function App() {
           return [[], [], []];
         });
 
-        // Get related artists for more connections (increased from 25 to 35 top artists)
+        // Get related artists for more connections
         const relatedArtists = await Promise.all(
           [...new Set([
             ...topArtistsLong.items.slice(0, 35),
@@ -59,7 +59,7 @@ function App() {
             ...topArtistsShort.items.slice(0, 35)
           ])].map(artist => 
             spotifyApi.getArtistRelatedArtists(artist.id)
-              .then(response => response.artists.slice(0, 6)) // Increased from 5 to 6 related artists each
+              .then(response => response.artists.slice(0, 6))
               .catch(() => [])
           )
         ).then(results => results.flat());
@@ -99,14 +99,14 @@ function App() {
             });
           });
 
-          // Get main genres (increased from 20 to 25)
+          // Get main genres
           const mainGenres = Array.from(artistGenreCounts.entries())
             .sort((a, b) => b[1] - a[1])
-            .filter(([genre, count]) => count >= 3) // Reduced threshold from 4 to 3
+            .filter(([genre, count]) => count >= 3)
             .slice(0, 25)
             .map(([genre]) => genre);
 
-          // Find bridge genres (increased from 30 to 40)
+          // Find bridge genres
           const bridgeGenres = Array.from(artistGenreCounts.entries())
             .filter(([genre]) => !mainGenres.includes(genre))
             .filter(([genre, count]) => {
@@ -114,7 +114,7 @@ function App() {
                 artist.genres.includes(genre) && 
                 artist.genres.some(g => mainGenres.includes(g))
               ).length;
-              return count >= 2 && connectingArtists >= 2; // Reduced count threshold from 3 to 2
+              return count >= 2 && connectingArtists >= 2;
             })
             .sort((a, b) => {
               const aConnections = allArtists.filter(artist => artist.genres.includes(a[0])).length;
@@ -127,8 +127,8 @@ function App() {
           // Position main genre clusters with adjusted spacing
           mainGenres.forEach((genre) => {
             const pos = [
-              (Math.random() - 0.5) * 65, // Increased from 55 to 65
-              (Math.random() - 0.5) * 40, // Increased from 35 to 40
+              (Math.random() - 0.5) * 65,
+              (Math.random() - 0.5) * 40,
               (Math.random() - 0.5) * 65
             ];
             
@@ -138,7 +138,7 @@ function App() {
                 Math.pow(existing.position[1] - pos[1], 2) +
                 Math.pow(existing.position[2] - pos[2], 2)
               );
-              return dist < 22; // Increased from 20 to 22 for more spacing
+              return dist < 22;
             })) {
               pos[0] = (Math.random() - 0.5) * 65;
               pos[1] = (Math.random() - 0.5) * 40;
@@ -174,7 +174,7 @@ function App() {
                 const bCount = artistGenreCounts.get(b) || 0;
                 return bCount - aCount;
               })
-              .slice(0, 4); // Increased from 3 to 4 genres per artist
+              .slice(0, 4);
 
             if (artistGenres.length > 0) {
               const primaryGenre = artistGenres.find(g => mainGenres.includes(g)) || artistGenres[0];
@@ -209,8 +209,8 @@ function App() {
                 ).map(coord => coord / mainGenrePositions.length);
 
                 const bridgePos = [
-                  centerPos[0] + (Math.random() - 0.5) * 15, // Increased from 12 to 15
-                  centerPos[1] + (Math.random() - 0.5) * 12, // Increased from 10 to 12
+                  centerPos[0] + (Math.random() - 0.5) * 15,
+                  centerPos[1] + (Math.random() - 0.5) * 12,
                   centerPos[2] + (Math.random() - 0.5) * 15
                 ];
 
@@ -238,7 +238,7 @@ function App() {
 
               const t = index / artists.length;
               const spiralAngle = t * Math.PI * 8;
-              const spiralRadius = (5 + Math.random() * 4) * (1 - t * 0.12); // Increased radius and reduced decay
+              const spiralRadius = (5 + Math.random() * 4) * (1 - t * 0.12);
               
               const otherGenrePositions = artistData.genres
                 .filter(g => g !== mainGenre)
@@ -292,7 +292,7 @@ function App() {
                       Math.pow(artistPos[2] - genreNode.position[2], 2)
                     );
                     
-                    if (dist < 35) { // Increased from 30 to 35
+                    if (dist < 35) {
                       connections.push({
                         start: artistPos,
                         end: genreNode.position,
