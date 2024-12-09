@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import Visualization from './components/Visualization';
 
 const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const REDIRECT_URI = 'https://jukebox-phi-jade.vercel.app';
+const REDIRECT_URI = 'https://jukebox-3g5sinxod-lliamfennell-gmailcoms-projects.vercel.app';
 const AUTH_ENDPOINT = 'https://accounts.spotify.com/authorize';
 const spotifyApi = new SpotifyWebApi();
 
